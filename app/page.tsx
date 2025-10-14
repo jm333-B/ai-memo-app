@@ -17,6 +17,9 @@ export default async function Home() {
     redirect("/login")
   }
 
+  // 로그인한 사용자는 노트 페이지로 리다이렉트
+  redirect("/notes")
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-2xl space-y-8">

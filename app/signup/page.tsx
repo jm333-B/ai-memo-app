@@ -51,8 +51,8 @@ export default function SignUpPage() {
         return
       }
 
-      // 회원가입 성공 시 메인 페이지로 이동
-      router.push("/")
+      // 회원가입 성공 시 노트 페이지로 이동
+      router.push("/notes")
     } catch (err) {
       setError("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.")
       console.error("SignUp error:", err)

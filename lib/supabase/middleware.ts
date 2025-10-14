@@ -37,7 +37,30 @@ export async function updateSession(request: NextRequest) {
   )
 
   // 세션 갱신 (중요: getUser()를 호출하여 세션 상태 확인)
-  await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // 인증이 필요한 경로 보호
+  const protectedPaths = ['/notes']
+  const isProtectedPath = protectedPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  )
+
+  // 인증되지 않은 사용자가 보호된 경로에 접근하면 로그인 페이지로 리다이렉트
+  if (isProtectedPath && !user) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // 인증된 사용자가 로그인/회원가입 페이지에 접근하면 홈으로 리다이렉트
+  const authPaths = ['/login', '/signup']
+  const isAuthPath = authPaths.includes(request.nextUrl.pathname)
+  if (isAuthPath && user) {
+    return NextResponse.redirect(new URL('/notes', request.url))
+  }
 
   return supabaseResponse
 }

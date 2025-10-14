@@ -51,8 +51,8 @@ export default function LoginPage() {
         return
       }
 
-      // 로그인 성공 시 메인 페이지로 이동
-      router.push("/")
+      // 로그인 성공 시 노트 페이지로 이동
+      router.push("/notes")
       router.refresh()
     } catch (err) {
       setError("로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
