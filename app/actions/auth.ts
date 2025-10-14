@@ -162,25 +162,100 @@ export async function signIn(data: SignInFormData): Promise<ActionResult> {
 
 /**
  * 로그아웃 Server Action
+ * 
+ * @returns 성공 시 로그인 페이지로 리다이렉션, 실패 시 에러 메시지
  */
 export async function signOut(): Promise<ActionResult> {
   try {
     const supabase = await createClient()
     
+    // Supabase 로그아웃 (모든 기기에서 세션 종료)
     const { error } = await supabase.auth.signOut()
     
     if (error) {
+      console.error("SignOut Supabase error:", error)
       return {
-        error: error.message,
+        error: "로그아웃에 실패했습니다. 다시 시도해주세요.",
       }
     }
 
+    // 캐시 재검증 및 로그인 페이지로 리다이렉션
     revalidatePath("/", "layout")
     redirect("/login")
   } catch (error) {
     console.error("SignOut action error:", error)
     return {
-      error: "로그아웃 중 오류가 발생했습니다",
+      error: "로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.",
+    }
+  }
+}
+
+/**
+ * 비밀번호 재설정 요청 Server Action
+ * 
+ * @param email - 재설정 링크를 받을 이메일 주소
+ * @returns 성공 또는 에러 메시지 (보안상 모든 경우 성공 메시지 반환)
+ */
+export async function resetPassword(email: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
+    
+    // Supabase 비밀번호 재설정 링크 발송
+    // redirectTo: 먼저 /auth/callback으로 가서 토큰을 세션으로 교환한 후 /update-password로 이동
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/update-password`,
+    })
+    
+    // 보안상 이유로 존재하지 않는 이메일도 성공으로 처리
+    if (error) {
+      console.error("Reset password error:", error)
+    }
+
+    // 항상 성공 반환 (보안)
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("ResetPassword action error:", error)
+    // 보안상 이유로 여전히 성공으로 처리
+    return {
+      success: true,
+    }
+  }
+}
+
+/**
+ * 비밀번호 업데이트 Server Action
+ * 
+ * @param password - 새 비밀번호
+ * @returns 성공 또는 에러 메시지
+ */
+export async function updatePassword(password: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
+    
+    // 새 비밀번호로 업데이트
+    const { error } = await supabase.auth.updateUser({
+      password,
+    })
+    
+    if (error) {
+      console.error("Update password error:", error)
+      return {
+        error: "비밀번호 업데이트에 실패했습니다. 다시 시도해주세요.",
+      }
+    }
+
+    // 성공: 캐시 재검증
+    revalidatePath("/", "layout")
+    
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("UpdatePassword action error:", error)
+    return {
+      error: "비밀번호 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.",
     }
   }
 }

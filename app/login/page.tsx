@@ -141,14 +141,12 @@ export default function LoginPage() {
 
               {/* 비밀번호 찾기 링크 */}
               <div className="flex items-center justify-end">
-                <button
-                  type="button"
-                  disabled
-                  className="text-sm text-gray-400 cursor-not-allowed"
-                  title="비밀번호 찾기 기능은 추후 제공됩니다"
+                <Link
+                  href="/reset-password"
+                  className="text-sm text-blue-600 hover:text-blue-500"
                 >
                   비밀번호를 잊으셨나요?
-                </button>
+                </Link>
               </div>
 
               {/* 제출 버튼 */}

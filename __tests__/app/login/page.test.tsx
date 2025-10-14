@@ -102,11 +102,12 @@ describe('LoginPage', () => {
     })
   })
 
-  it('비밀번호 찾기 링크가 disabled 상태여야 함', () => {
+  it('비밀번호 찾기 링크가 표시되어야 함', () => {
     render(<LoginPage />)
 
-    const forgotPasswordButton = screen.getByText(/비밀번호를 잊으셨나요?/)
-    expect(forgotPasswordButton).toBeDisabled()
+    const forgotPasswordLink = screen.getByText(/비밀번호를 잊으셨나요?/)
+    expect(forgotPasswordLink).toBeInTheDocument()
+    expect(forgotPasswordLink).toHaveAttribute('href', '/reset-password')
   })
 })
 

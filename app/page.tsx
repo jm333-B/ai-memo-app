@@ -5,8 +5,8 @@
 
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { getCurrentUser, signOut } from "@/app/actions/auth"
-import { Button } from "@/components/ui/button"
+import { getCurrentUser } from "@/app/actions/auth"
+import { LogoutButton } from "@/components/logout-button"
 
 export default async function Home() {
   // 현재 로그인한 사용자 확인
@@ -64,15 +64,7 @@ export default async function Home() {
 
         {/* 액션 버튼 */}
         <div className="flex justify-center gap-4">
-          <form action={signOut}>
-            <Button
-              type="submit"
-              variant="outline"
-              className="min-w-[120px]"
-            >
-              로그아웃
-            </Button>
-          </form>
+          <LogoutButton />
         </div>
 
         {/* 푸터 */}
