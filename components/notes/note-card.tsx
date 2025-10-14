@@ -11,26 +11,75 @@ import { formatRelativeTime, truncateText } from '@/lib/utils/date';
 
 interface NoteCardProps {
   note: Note;
+  isDeleteMode?: boolean;
+  isSelected?: boolean;
+  onSelect?: (noteId: string) => void;
 }
 
-export function NoteCard({ note }: NoteCardProps) {
+export function NoteCard({ 
+  note, 
+  isDeleteMode = false, 
+  isSelected = false, 
+  onSelect 
+}: NoteCardProps) {
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onSelect) {
+      onSelect(note.id);
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (isDeleteMode) {
+      e.preventDefault();
+      if (onSelect) {
+        onSelect(note.id);
+      }
+    }
+  };
+
+  const cardContent = (
+    <div 
+      className={`rounded-lg bg-white p-6 shadow-sm ring-1 transition-all ${
+        isDeleteMode 
+          ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' 
+          : 'ring-gray-900/5 hover:shadow-md'
+      } ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
+      onClick={handleCardClick}
+    >
+      <div className="flex items-start justify-between gap-4">
+        {isDeleteMode && (
+          <div className="flex-shrink-0 pt-1">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={handleCheckboxChange}
+              className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-lg font-semibold text-gray-900">
+            {note.title}
+          </h3>
+          <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+            {truncateText(note.content, 150)}
+          </p>
+        </div>
+        <time className="flex-shrink-0 text-xs text-gray-500">
+          {formatRelativeTime(note.createdAt)}
+        </time>
+      </div>
+    </div>
+  );
+
+  if (isDeleteMode) {
+    return cardContent;
+  }
+
   return (
     <Link href={`/notes/${note.id}`}>
-      <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all hover:shadow-md">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-lg font-semibold text-gray-900">
-              {note.title}
-            </h3>
-            <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-              {truncateText(note.content, 150)}
-            </p>
-          </div>
-          <time className="flex-shrink-0 text-xs text-gray-500">
-            {formatRelativeTime(note.createdAt)}
-          </time>
-        </div>
-      </div>
+      {cardContent}
     </Link>
   );
 }

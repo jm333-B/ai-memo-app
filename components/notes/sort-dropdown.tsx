@@ -21,7 +21,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "latest", label: "최신순" },
   { value: "oldest", label: "오래된순" },
   { value: "title-asc", label: "제목순 (가나다)" },
-  { value: "title-desc", label: "제목 역순 (하바사)" },
+  { value: "title-desc", label: "제목역순 (다나가)" },
 ];
 
 interface SortDropdownProps {

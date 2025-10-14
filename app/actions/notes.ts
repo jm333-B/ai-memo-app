@@ -359,3 +359,53 @@ export async function restoreNote(noteId: string) {
   redirect('/notes');
 }
 
+export async function deleteNotes(noteIds: string[]) {
+  try {
+    // 사용자 인증 확인
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { error: '로그인이 필요합니다' };
+    }
+
+    if (!noteIds || noteIds.length === 0) {
+      return { error: '삭제할 노트를 선택해주세요' };
+    }
+
+    // 권한 검증: 삭제하려는 노트들이 현재 사용자의 것인지 확인
+    const existingNotes = await db
+      .select()
+      .from(schema.notes)
+      .where(eq(schema.notes.userId, user.id));
+
+    const userNoteIds = new Set(existingNotes.map((note) => note.id));
+    const invalidNoteIds = noteIds.filter((id) => !userNoteIds.has(id));
+
+    if (invalidNoteIds.length > 0) {
+      return { error: '권한이 없는 노트가 포함되어 있습니다' };
+    }
+
+    // 일괄 소프트 삭제
+    for (const noteId of noteIds) {
+      await db
+        .update(schema.notes)
+        .set({
+          deletedAt: new Date(),
+        })
+        .where(eq(schema.notes.id, noteId));
+    }
+
+    // 목록 페이지 캐시 무효화
+    revalidatePath('/notes');
+
+    return { success: true, deletedCount: noteIds.length };
+  } catch (error) {
+    console.error('노트 일괄 삭제 실패:', error);
+    return { error: '노트 삭제에 실패했습니다' };
+  }
+}
+

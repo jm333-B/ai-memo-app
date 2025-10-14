@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { getNotes } from '@/app/actions/notes';
-import { NoteCard } from '@/components/notes/note-card';
 import { EmptyState } from '@/components/notes/empty-state';
 import { Pagination } from '@/components/notes/pagination';
 import { LogoutButton } from '@/components/logout-button';
 import { SortDropdown, type SortOption } from '@/components/notes/sort-dropdown';
+import { NotesList } from '@/components/notes/notes-list';
 
 interface NotesPageProps {
   searchParams: Promise<{ page?: string; sort?: string }>;
@@ -75,11 +75,7 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
           <>
             <SortDropdown />
             
-            <div className="grid gap-4">
-              {notes.map((note) => (
-                <NoteCard key={note.id} note={note} />
-              ))}
-            </div>
+            <NotesList notes={notes} />
 
             {totalPages > 1 && (
               <Pagination currentPage={page} totalPages={totalPages} />
