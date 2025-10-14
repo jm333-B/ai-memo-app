@@ -21,6 +21,7 @@ export const notes = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
       .default(sql`now()`),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (table) => ({
     userIdIdx: index('notes_user_id_idx').on(table.userId),

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { db, schema } from '@/lib/db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, isNull } from 'drizzle-orm';
 
 describe('Notes Server Actions', () => {
   const testUserId = crypto.randomUUID();
@@ -122,6 +122,172 @@ describe('Notes Server Actions', () => {
           await db.delete(schema.notes).where(eq(schema.notes.id, id));
         }
       }
+    });
+  });
+
+  describe('getNoteById 테스트', () => {
+    let testNoteId: string | undefined;
+
+    afterEach(async () => {
+      if (testNoteId) {
+        try {
+          await db.delete(schema.notes).where(eq(schema.notes.id, testNoteId));
+        } catch (error) {
+          console.warn('테스트 데이터 정리 실패:', error);
+        }
+      }
+    });
+
+    it('노트 ID로 조회할 수 있어야 함', async () => {
+      // 노트 생성
+      const [newNote] = await db
+        .insert(schema.notes)
+        .values({
+          userId: testUserId,
+          title: '상세 조회 테스트',
+          content: '상세 조회 테스트 내용',
+        })
+        .returning();
+
+      testNoteId = newNote.id;
+
+      // ID로 조회
+      const [note] = await db
+        .select()
+        .from(schema.notes)
+        .where(eq(schema.notes.id, testNoteId))
+        .limit(1);
+
+      expect(note).toBeDefined();
+      expect(note.id).toBe(testNoteId);
+      expect(note.title).toBe('상세 조회 테스트');
+    });
+  });
+
+  describe('updateNote 테스트', () => {
+    let testNoteId: string | undefined;
+
+    afterEach(async () => {
+      if (testNoteId) {
+        try {
+          await db.delete(schema.notes).where(eq(schema.notes.id, testNoteId));
+        } catch (error) {
+          console.warn('테스트 데이터 정리 실패:', error);
+        }
+      }
+    });
+
+    it('노트를 수정할 수 있어야 함', async () => {
+      // 노트 생성
+      const [newNote] = await db
+        .insert(schema.notes)
+        .values({
+          userId: testUserId,
+          title: '수정 전 제목',
+          content: '수정 전 내용',
+        })
+        .returning();
+
+      testNoteId = newNote.id;
+
+      // 노트 수정
+      await db
+        .update(schema.notes)
+        .set({
+          title: '수정 후 제목',
+          content: '수정 후 내용',
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.notes.id, testNoteId));
+
+      // 수정 확인
+      const [updatedNote] = await db
+        .select()
+        .from(schema.notes)
+        .where(eq(schema.notes.id, testNoteId))
+        .limit(1);
+
+      expect(updatedNote.title).toBe('수정 후 제목');
+      expect(updatedNote.content).toBe('수정 후 내용');
+    });
+  });
+
+  describe('deleteNote (소프트 삭제) 테스트', () => {
+    let testNoteId: string | undefined;
+
+    afterEach(async () => {
+      if (testNoteId) {
+        try {
+          await db.delete(schema.notes).where(eq(schema.notes.id, testNoteId));
+        } catch (error) {
+          console.warn('테스트 데이터 정리 실패:', error);
+        }
+      }
+    });
+
+    it('노트를 소프트 삭제할 수 있어야 함', async () => {
+      // 노트 생성
+      const [newNote] = await db
+        .insert(schema.notes)
+        .values({
+          userId: testUserId,
+          title: '삭제 테스트',
+          content: '삭제 테스트 내용',
+        })
+        .returning();
+
+      testNoteId = newNote.id;
+
+      // 소프트 삭제
+      await db
+        .update(schema.notes)
+        .set({
+          deletedAt: new Date(),
+        })
+        .where(eq(schema.notes.id, testNoteId));
+
+      // 삭제 확인
+      const [deletedNote] = await db
+        .select()
+        .from(schema.notes)
+        .where(eq(schema.notes.id, testNoteId))
+        .limit(1);
+
+      expect(deletedNote.deletedAt).not.toBeNull();
+    });
+
+    it('삭제된 노트는 목록에서 제외되어야 함', async () => {
+      // 노트 생성
+      const [newNote] = await db
+        .insert(schema.notes)
+        .values({
+          userId: testUserId,
+          title: '삭제 테스트',
+          content: '삭제 테스트 내용',
+        })
+        .returning();
+
+      testNoteId = newNote.id;
+
+      // 소프트 삭제
+      await db
+        .update(schema.notes)
+        .set({
+          deletedAt: new Date(),
+        })
+        .where(eq(schema.notes.id, testNoteId));
+
+      // 목록 조회 (삭제되지 않은 노트만)
+      const notes = await db
+        .select()
+        .from(schema.notes)
+        .where(
+          eq(schema.notes.userId, testUserId)
+        )
+        .where(isNull(schema.notes.deletedAt));
+
+      // 삭제된 노트는 목록에 없어야 함
+      expect(notes.every((note) => note.id !== testNoteId)).toBe(true);
     });
   });
 });

@@ -54,6 +54,9 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
             </p>
           </div>
           <div className="flex gap-3">
+            <Link href="/notes/trash">
+              <Button variant="outline">휴지통</Button>
+            </Link>
             <Link href="/notes/new">
               <Button>새 노트 작성</Button>
             </Link>
