@@ -1,7 +1,7 @@
 // lib/validations/auth.ts
 // 인증 관련 유효성 검증 스키마
 // 이메일과 비밀번호 형식을 검증하는 Zod 스키마 정의
-// Related: app/signup/page.tsx, app/actions/auth.ts
+// Related: app/signup/page.tsx, app/login/page.tsx, app/actions/auth.ts
 
 import { z } from "zod"
 
@@ -40,4 +40,15 @@ export const signUpSchema = z.object({
 })
 
 export type SignUpFormData = z.infer<typeof signUpSchema>
+
+/**
+ * 로그인 폼 스키마
+ * 로그인은 기본 이메일 형식만 검증 (비밀번호 강도 검증 불필요)
+ */
+export const signInSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, "비밀번호를 입력해주세요"),
+})
+
+export type SignInFormData = z.infer<typeof signInSchema>
 

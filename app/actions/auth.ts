@@ -1,14 +1,19 @@
 // app/actions/auth.ts
 // 인증 관련 Server Actions
 // 회원가입, 로그인, 로그아웃 등 인증 처리를 위한 서버 액션
-// Related: app/signup/page.tsx, lib/supabase/server.ts, lib/validations/auth.ts
+// Related: app/signup/page.tsx, app/login/page.tsx, lib/supabase/server.ts, lib/validations/auth.ts
 
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { signUpSchema, type SignUpFormData } from "@/lib/validations/auth"
+import { 
+  signUpSchema, 
+  type SignUpFormData,
+  signInSchema,
+  type SignInFormData 
+} from "@/lib/validations/auth"
 
 type ActionResult = {
   error?: string
@@ -80,6 +85,77 @@ export async function signUp(data: SignUpFormData): Promise<ActionResult> {
     console.error("SignUp action error:", error)
     return {
       error: "회원가입 중 오류가 발생했습니다. 다시 시도해주세요.",
+    }
+  }
+}
+
+/**
+ * 로그인 Server Action
+ * 
+ * @param data - 로그인 폼 데이터 (이메일, 비밀번호)
+ * @returns 성공 또는 에러 메시지
+ */
+export async function signIn(data: SignInFormData): Promise<ActionResult> {
+  try {
+    // 서버 사이드 유효성 검증
+    const validatedData = signInSchema.safeParse(data)
+    
+    if (!validatedData.success) {
+      return {
+        error: validatedData.error.errors[0]?.message || "입력값이 올바르지 않습니다",
+      }
+    }
+
+    const { email, password } = validatedData.data
+
+    // Supabase 클라이언트 생성
+    const supabase = await createClient()
+
+    // 로그인 시도
+    const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    // 에러 처리
+    if (signInError) {
+      // 잘못된 인증 정보인 경우
+      if (signInError.message.includes("Invalid login credentials")) {
+        return {
+          error: "이메일 또는 비밀번호가 올바르지 않습니다",
+        }
+      }
+
+      // 이메일 확인이 필요한 경우
+      if (signInError.message.includes("Email not confirmed")) {
+        return {
+          error: "이메일 확인이 필요합니다. 이메일을 확인해주세요.",
+        }
+      }
+
+      // 기타 에러
+      return {
+        error: signInError.message || "로그인에 실패했습니다",
+      }
+    }
+
+    // 세션이 없는 경우
+    if (!authData.session) {
+      return {
+        error: "로그인에 실패했습니다. 다시 시도해주세요.",
+      }
+    }
+
+    // 성공: 캐시 재검증
+    revalidatePath("/", "layout")
+    
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("SignIn action error:", error)
+    return {
+      error: "로그인 중 오류가 발생했습니다. 다시 시도해주세요.",
     }
   }
 }

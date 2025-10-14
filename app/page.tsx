@@ -1,103 +1,94 @@
-import Image from "next/image";
+// app/page.tsx
+// 메인 페이지
+// 로그인한 사용자를 위한 환영 페이지, 미인증 사용자는 로그인 페이지로 리다이렉트
+// Related: app/actions/auth.ts, app/login/page.tsx, app/signup/page.tsx
 
-export default function Home() {
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import { getCurrentUser, signOut } from "@/app/actions/auth"
+import { Button } from "@/components/ui/button"
+
+export default async function Home() {
+  // 현재 로그인한 사용자 확인
+  const user = await getCurrentUser()
+
+  // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+  if (!user) {
+    redirect("/login")
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-2xl space-y-8">
+        {/* 헤더 */}
+        <div className="text-center">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+            AI 메모장
+          </h1>
+          <p className="mt-4 text-lg text-gray-600">
+            환영합니다, <span className="font-semibold">{user.email}</span>님!
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* 메인 컨텐츠 */}
+        <div className="rounded-lg bg-white px-8 py-10 shadow-sm ring-1 ring-gray-900/5">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold text-gray-900">
+                시작하기
+              </h2>
+              <p className="text-gray-600">
+                AI 메모장으로 더 스마트하게 메모를 관리하세요.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-md bg-blue-50 p-4">
+                <h3 className="font-medium text-blue-900">✨ 주요 기능 (예정)</h3>
+                <ul className="mt-2 space-y-1 text-sm text-blue-700">
+                  <li>• 음성 메모 녹음 및 자동 텍스트 변환</li>
+                  <li>• AI 기반 자동 요약 및 태그 생성</li>
+                  <li>• 강력한 검색 및 필터링</li>
+                  <li>• 데이터 내보내기 (JSON/CSV)</li>
+                </ul>
+              </div>
+
+              <div className="pt-4">
+                <p className="text-sm text-gray-500">
+                  현재 사용자 인증 기능이 완료되었습니다. 추가 기능은 순차적으로 개발될 예정입니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 액션 버튼 */}
+        <div className="flex justify-center gap-4">
+          <form action={signOut}>
+            <Button
+              type="submit"
+              variant="outline"
+              className="min-w-[120px]"
+            >
+              로그아웃
+            </Button>
+          </form>
+        </div>
+
+        {/* 푸터 */}
+        <div className="text-center text-sm text-gray-500">
+          <p>
+            개발 중인 프로젝트입니다. |{" "}
+            <Link href="/signup" className="text-blue-600 hover:underline">
+              회원가입
+            </Link>{" "}
+            |{" "}
+            <Link href="/login" className="text-blue-600 hover:underline">
+              로그인
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
