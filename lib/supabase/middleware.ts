@@ -36,13 +36,35 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // 세션 갱신 (중요: getUser()를 호출하여 세션 상태 확인)
+  // 세션 갱신 및 만료 확인 (중요: getUser()를 호출하여 세션 상태 확인)
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // 세션 가져오기 (만료 시간 확인용)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  // 세션 만료 임박 시 자동 갱신 (만료 5분 전)
+  if (session && session.expires_at) {
+    const expiresAt = session.expires_at
+    const now = Math.floor(Date.now() / 1000)
+    const timeUntilExpiry = expiresAt - now
+
+    // 5분 (300초) 이내에 만료 예정이면 갱신
+    if (timeUntilExpiry < 300 && timeUntilExpiry > 0) {
+      const { error } = await supabase.auth.refreshSession()
+      if (error) {
+        console.error('Session refresh error:', error)
+      } else {
+        console.log('Session refreshed automatically')
+      }
+    }
+  }
+
   // 인증이 필요한 경로 보호
-  const protectedPaths = ['/notes']
+  const protectedPaths = ['/notes', '/onboarding']
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )

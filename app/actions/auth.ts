@@ -14,9 +14,11 @@ import {
   signInSchema,
   type SignInFormData 
 } from "@/lib/validations/auth"
+import { handleAuthError, logServerError } from "@/lib/utils/error-handler"
 
 type ActionResult = {
   error?: string
+  action?: string
   success?: boolean
 }
 
@@ -34,6 +36,7 @@ export async function signUp(data: SignUpFormData): Promise<ActionResult> {
     if (!validatedData.success) {
       return {
         error: validatedData.error.errors[0]?.message || "입력값이 올바르지 않습니다",
+        action: "입력 내용을 확인하고 다시 시도하세요.",
       }
     }
 
@@ -55,16 +58,11 @@ export async function signUp(data: SignUpFormData): Promise<ActionResult> {
 
     // 에러 처리
     if (signUpError) {
-      // 이미 가입된 이메일인 경우
-      if (signUpError.message.includes("already registered")) {
-        return {
-          error: "이미 가입된 이메일입니다",
-        }
-      }
-
-      // 기타 에러
+      logServerError(signUpError, { action: 'signUp', email })
+      const errorInfo = handleAuthError(signUpError)
       return {
-        error: signUpError.message || "회원가입에 실패했습니다",
+        error: errorInfo.message,
+        action: errorInfo.action,
       }
     }
 
@@ -72,19 +70,22 @@ export async function signUp(data: SignUpFormData): Promise<ActionResult> {
     if (!authData.session) {
       return {
         error: "이메일 확인이 필요합니다. 이메일을 확인해주세요.",
+        action: "받은 이메일의 확인 링크를 클릭하세요.",
       }
     }
 
-    // 성공: 캐시 재검증 및 리다이렉트
+    // 성공: 캐시 재검증
     revalidatePath("/", "layout")
     
     return {
       success: true,
     }
   } catch (error) {
-    console.error("SignUp action error:", error)
+    logServerError(error, { action: 'signUp' })
+    const errorInfo = handleAuthError(error)
     return {
-      error: "회원가입 중 오류가 발생했습니다. 다시 시도해주세요.",
+      error: errorInfo.message,
+      action: errorInfo.action,
     }
   }
 }
@@ -103,6 +104,7 @@ export async function signIn(data: SignInFormData): Promise<ActionResult> {
     if (!validatedData.success) {
       return {
         error: validatedData.error.errors[0]?.message || "입력값이 올바르지 않습니다",
+        action: "입력 내용을 확인하고 다시 시도하세요.",
       }
     }
 
@@ -119,23 +121,11 @@ export async function signIn(data: SignInFormData): Promise<ActionResult> {
 
     // 에러 처리
     if (signInError) {
-      // 잘못된 인증 정보인 경우
-      if (signInError.message.includes("Invalid login credentials")) {
-        return {
-          error: "이메일 또는 비밀번호가 올바르지 않습니다",
-        }
-      }
-
-      // 이메일 확인이 필요한 경우
-      if (signInError.message.includes("Email not confirmed")) {
-        return {
-          error: "이메일 확인이 필요합니다. 이메일을 확인해주세요.",
-        }
-      }
-
-      // 기타 에러
+      logServerError(signInError, { action: 'signIn', email })
+      const errorInfo = handleAuthError(signInError)
       return {
-        error: signInError.message || "로그인에 실패했습니다",
+        error: errorInfo.message,
+        action: errorInfo.action,
       }
     }
 
@@ -143,6 +133,7 @@ export async function signIn(data: SignInFormData): Promise<ActionResult> {
     if (!authData.session) {
       return {
         error: "로그인에 실패했습니다. 다시 시도해주세요.",
+        action: "문제가 계속되면 비밀번호를 재설정하세요.",
       }
     }
 
@@ -153,9 +144,11 @@ export async function signIn(data: SignInFormData): Promise<ActionResult> {
       success: true,
     }
   } catch (error) {
-    console.error("SignIn action error:", error)
+    logServerError(error, { action: 'signIn' })
+    const errorInfo = handleAuthError(error)
     return {
-      error: "로그인 중 오류가 발생했습니다. 다시 시도해주세요.",
+      error: errorInfo.message,
+      action: errorInfo.action,
     }
   }
 }
@@ -173,9 +166,11 @@ export async function signOut(): Promise<ActionResult> {
     const { error } = await supabase.auth.signOut()
     
     if (error) {
-      console.error("SignOut Supabase error:", error)
+      logServerError(error, { action: 'signOut' })
+      const errorInfo = handleAuthError(error)
       return {
-        error: "로그아웃에 실패했습니다. 다시 시도해주세요.",
+        error: errorInfo.message,
+        action: errorInfo.action,
       }
     }
 
@@ -183,9 +178,11 @@ export async function signOut(): Promise<ActionResult> {
     revalidatePath("/", "layout")
     redirect("/login")
   } catch (error) {
-    console.error("SignOut action error:", error)
+    logServerError(error, { action: 'signOut' })
+    const errorInfo = handleAuthError(error)
     return {
-      error: "로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.",
+      error: errorInfo.message,
+      action: errorInfo.action,
     }
   }
 }
@@ -207,8 +204,9 @@ export async function resetPassword(email: string): Promise<ActionResult> {
     })
     
     // 보안상 이유로 존재하지 않는 이메일도 성공으로 처리
+    // 하지만 에러는 로깅
     if (error) {
-      console.error("Reset password error:", error)
+      logServerError(error, { action: 'resetPassword', email })
     }
 
     // 항상 성공 반환 (보안)
@@ -216,7 +214,7 @@ export async function resetPassword(email: string): Promise<ActionResult> {
       success: true,
     }
   } catch (error) {
-    console.error("ResetPassword action error:", error)
+    logServerError(error, { action: 'resetPassword' })
     // 보안상 이유로 여전히 성공으로 처리
     return {
       success: true,
@@ -240,9 +238,11 @@ export async function updatePassword(password: string): Promise<ActionResult> {
     })
     
     if (error) {
-      console.error("Update password error:", error)
+      logServerError(error, { action: 'updatePassword' })
+      const errorInfo = handleAuthError(error)
       return {
-        error: "비밀번호 업데이트에 실패했습니다. 다시 시도해주세요.",
+        error: errorInfo.message,
+        action: errorInfo.action,
       }
     }
 
@@ -253,9 +253,11 @@ export async function updatePassword(password: string): Promise<ActionResult> {
       success: true,
     }
   } catch (error) {
-    console.error("UpdatePassword action error:", error)
+    logServerError(error, { action: 'updatePassword' })
+    const errorInfo = handleAuthError(error)
     return {
-      error: "비밀번호 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.",
+      error: errorInfo.message,
+      action: errorInfo.action,
     }
   }
 }
@@ -269,12 +271,13 @@ export async function getCurrentUser() {
     const { data: { user }, error } = await supabase.auth.getUser()
     
     if (error) {
+      logServerError(error, { action: 'getCurrentUser' })
       return null
     }
     
     return user
   } catch (error) {
-    console.error("GetCurrentUser error:", error)
+    logServerError(error, { action: 'getCurrentUser' })
     return null
   }
 }

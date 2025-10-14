@@ -23,7 +23,7 @@ import {
 import { createNoteSchema, type CreateNoteInput } from '@/lib/validations/notes';
 import { createNote } from '@/app/actions/notes';
 import { useAutoSave } from '@/hooks/use-auto-save';
-import { getDraftKey, loadDraft, deleteDraft } from '@/lib/utils/draft-storage';
+import { getDraftKey } from '@/lib/utils/draft-storage';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Save, Trash2 } from 'lucide-react';
@@ -32,8 +32,6 @@ export default function NewNotePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [draftLoaded, setDraftLoaded] = useState(false);
-  const [showDraftNotification, setShowDraftNotification] = useState(false);
 
   const form = useForm<CreateNoteInput>({
     resolver: zodResolver(createNoteSchema),
@@ -55,22 +53,6 @@ export default function NewNotePage() {
     delay: 1500,
     enabled: !isSubmitting,
   });
-
-  // 컴포넌트 마운트 시 임시 저장 불러오기
-  useEffect(() => {
-    const draft = loadDraft(draftKey);
-    if (draft && (draft.title || draft.content)) {
-      form.setValue('title', draft.title);
-      form.setValue('content', draft.content);
-      setDraftLoaded(true);
-      setShowDraftNotification(true);
-      
-      // 3초 후 알림 숨기기
-      setTimeout(() => {
-        setShowDraftNotification(false);
-      }, 3000);
-    }
-  }, [draftKey, form]);
 
   // 페이지 이탈 방지
   useEffect(() => {
@@ -136,15 +118,6 @@ export default function NewNotePage() {
             제목과 본문을 입력하여 노트를 작성하세요
           </p>
         </div>
-
-        {/* 임시 저장 알림 */}
-        {showDraftNotification && (
-          <div className="rounded-md bg-blue-50 p-4 transition-all">
-            <p className="text-sm text-blue-800">
-              ✓ 임시 저장된 내용을 불러왔습니다
-            </p>
-          </div>
-        )}
 
         <div className="rounded-lg bg-white px-8 py-10 shadow-sm ring-1 ring-gray-900/5">
           <Form {...form}>
@@ -230,7 +203,7 @@ export default function NewNotePage() {
                 >
                   취소
                 </Button>
-                {(title.trim() || content.trim() || draftLoaded) && (
+                {(title.trim() || content.trim()) && (
                   <Button
                     type="button"
                     variant="ghost"

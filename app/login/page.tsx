@@ -24,12 +24,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { signInSchema, type SignInFormData } from "@/lib/validations/auth"
 import { signIn } from "@/app/actions/auth"
+import { showErrorToast, showSuccessToast } from "@/lib/utils/toast"
 
 export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
@@ -42,20 +42,20 @@ export default function LoginPage() {
   const onSubmit = async (data: SignInFormData) => {
     try {
       setIsLoading(true)
-      setError(null)
 
       const result = await signIn(data)
 
       if (result.error) {
-        setError(result.error)
+        showErrorToast(result.error, result.action)
         return
       }
 
       // 로그인 성공 시 노트 페이지로 이동
+      showSuccessToast("로그인 성공!", "AI 메모장에 오신 것을 환영합니다.")
       router.push("/notes")
       router.refresh()
     } catch (err) {
-      setError("로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
+      showErrorToast("로그인 중 오류가 발생했습니다.", "다시 시도해주세요.")
       console.error("SignIn error:", err)
     } finally {
       setIsLoading(false)
@@ -79,12 +79,6 @@ export default function LoginPage() {
         <div className="rounded-lg bg-white px-8 py-10 shadow-sm ring-1 ring-gray-900/5">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* 에러 메시지 */}
-              {error && (
-                <div className="rounded-md bg-red-50 p-4">
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
-              )}
 
               {/* 이메일 필드 */}
               <FormField
