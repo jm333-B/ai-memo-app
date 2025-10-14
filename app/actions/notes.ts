@@ -10,7 +10,7 @@ import { revalidatePath } from 'next/cache';
 import { db, schema } from '@/lib/db';
 import { createNoteSchema } from '@/lib/validations/notes';
 import { createClient } from '@/lib/supabase/server';
-import { eq, desc, count, and, isNull, isNotNull } from 'drizzle-orm';
+import { eq, desc, asc, count, and, isNull, isNotNull } from 'drizzle-orm';
 
 export async function createNote(formData: FormData) {
   try {
@@ -60,7 +60,10 @@ export async function createNote(formData: FormData) {
   redirect('/notes');
 }
 
-export async function getNotes(page: number = 1) {
+export async function getNotes(
+  page: number = 1,
+  sortBy: 'latest' | 'oldest' | 'title-asc' | 'title-desc' = 'latest'
+) {
   try {
     // 사용자 인증 확인
     const supabase = await createClient();
@@ -76,6 +79,24 @@ export async function getNotes(page: number = 1) {
     const limit = 20;
     const offset = (page - 1) * limit;
 
+    // 정렬 옵션에 따라 orderBy 절 결정
+    let orderByClause;
+    switch (sortBy) {
+      case 'oldest':
+        orderByClause = asc(schema.notes.createdAt);
+        break;
+      case 'title-asc':
+        orderByClause = asc(schema.notes.title);
+        break;
+      case 'title-desc':
+        orderByClause = desc(schema.notes.title);
+        break;
+      case 'latest':
+      default:
+        orderByClause = desc(schema.notes.createdAt);
+        break;
+    }
+
     // 노트 목록 조회 (삭제되지 않은 노트만)
     const notes = await db
       .select()
@@ -86,7 +107,7 @@ export async function getNotes(page: number = 1) {
           isNull(schema.notes.deletedAt)
         )
       )
-      .orderBy(desc(schema.notes.createdAt))
+      .orderBy(orderByClause)
       .limit(limit)
       .offset(offset);
 

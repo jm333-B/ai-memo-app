@@ -1,7 +1,7 @@
 // app/notes/page.tsx
-// 노트 목록 조회 페이지 - 사용자의 모든 노트를 페이지네이션과 함께 표시
-// 빈 상태 UI, 검색 쿼리 파라미터 기반 페이지네이션 포함
-// 관련 파일: app/actions/notes.ts, components/notes/empty-state.tsx
+// 노트 목록 조회 페이지 - 사용자의 모든 노트를 페이지네이션, 정렬과 함께 표시
+// 빈 상태 UI, 검색 쿼리 파라미터 기반 페이지네이션 및 정렬 포함
+// 관련 파일: app/actions/notes.ts, components/notes/empty-state.tsx, components/notes/sort-dropdown.tsx
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -11,20 +11,22 @@ import { NoteCard } from '@/components/notes/note-card';
 import { EmptyState } from '@/components/notes/empty-state';
 import { Pagination } from '@/components/notes/pagination';
 import { LogoutButton } from '@/components/logout-button';
+import { SortDropdown, type SortOption } from '@/components/notes/sort-dropdown';
 
 interface NotesPageProps {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }
 
 export default async function NotesPage({ searchParams }: NotesPageProps) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
+  const sortBy = (params.sort as SortOption) || 'latest';
 
   if (page < 1) {
     redirect('/notes?page=1');
   }
 
-  const { notes, totalPages, error } = await getNotes(page);
+  const { notes, totalPages, error } = await getNotes(page, sortBy);
 
   if (error) {
     return (
@@ -65,9 +67,14 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
         </div>
 
         {notes.length === 0 ? (
-          <EmptyState />
+          <div className="space-y-4">
+            <SortDropdown disabled={true} />
+            <EmptyState />
+          </div>
         ) : (
           <>
+            <SortDropdown />
+            
             <div className="grid gap-4">
               {notes.map((note) => (
                 <NoteCard key={note.id} note={note} />
