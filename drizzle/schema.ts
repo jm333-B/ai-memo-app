@@ -51,9 +51,33 @@ export const userProfiles = pgTable(
   })
 );
 
+// AI 요약 테이블
+export const summaries = pgTable(
+  'summaries',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    noteId: uuid('note_id')
+      .notNull()
+      .references(() => notes.id, { onDelete: 'cascade' }),
+    content: text('content').notNull(),
+    model: text('model').notNull().default('gemini-2.0-flash'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => ({
+    noteIdIdx: index('summaries_note_id_idx').on(table.noteId),
+    createdAtIdx: index('summaries_created_at_idx').on(table.createdAt),
+  })
+);
+
 // 타입 추출
 export type Note = typeof notes.$inferSelect;
 export type NewNote = typeof notes.$inferInsert;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
+export type Summary = typeof summaries.$inferSelect;
+export type NewSummary = typeof summaries.$inferInsert;
 
