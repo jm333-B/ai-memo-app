@@ -14,7 +14,6 @@ import { useIntegratedSearch } from '@/hooks/use-integrated-search';
 import { useSearchLoading } from '@/hooks/use-search-loading';
 import { TagFilter } from './tag-filter';
 import { DateFilter } from './date-filter';
-import { EmptySearchResults } from './empty-search-results';
 import { SearchLoadingSpinner, SearchError } from '@/components/ui/search-loading';
 
 interface IntegratedSearchProps {

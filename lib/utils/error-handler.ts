@@ -31,7 +31,7 @@ export function handleAuthError(error: unknown): ErrorHandlingResult {
     console.error('[Auth Error]', error)
   } else {
     // 프로덕션 환경에서는 에러만 로깅 (민감한 정보 제외)
-    console.error('[Auth Error]', (error as any)?.message || 'Unknown error')
+    console.error('[Auth Error]', (error as { message?: string })?.message || 'Unknown error')
   }
 
   // 에러 타입 식별
@@ -70,7 +70,7 @@ export function handleAuthError(error: unknown): ErrorHandlingResult {
   }
 
   // 에러 객체에서 메시지 추출
-  const errorMessage = (error as any)?.message || String(error)
+  const errorMessage = (error as { message?: string })?.message || String(error)
   const errorInfo = AUTH_ERROR_MESSAGES[errorMessage] || AUTH_ERROR_MESSAGES['default']
 
   return {
@@ -87,14 +87,14 @@ export function handleAuthError(error: unknown): ErrorHandlingResult {
  * @param error - 로깅할 에러
  * @param context - 에러 발생 컨텍스트 (함수명, 사용자 ID 등)
  */
-export function logServerError(error: unknown, context?: Record<string, any>) {
+export function logServerError(error: unknown, context?: Record<string, unknown>) {
   const isDev = process.env.NODE_ENV === 'development'
   const timestamp = new Date().toISOString()
   
   const logData = {
     timestamp,
-    error: (error as any)?.message || String(error),
-    stack: isDev ? (error as any)?.stack : undefined,
+    error: (error as { message?: string })?.message || String(error),
+    stack: isDev ? (error as { stack?: string })?.stack : undefined,
     context,
   }
 

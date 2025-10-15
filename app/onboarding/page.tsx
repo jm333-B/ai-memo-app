@@ -94,7 +94,7 @@ export default function OnboardingPage() {
       showSuccessToast("온보딩 완료!", "AI 메모장 사용을 시작하세요.")
       router.push("/notes")
       router.refresh()
-    } catch (error) {
+    } catch {
       showErrorToast("온보딩 완료 중 오류가 발생했습니다.", "다시 시도해주세요.")
     } finally {
       setIsLoading(false)
@@ -157,7 +157,8 @@ export default function OnboardingPage() {
               ))
             ) : (
               // Step 2: 아이콘이 있는 목록
-              step.features.map((feature: any, index: number) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (step.features as { icon: React.ComponentType<any>; title: string; desc: string }[]).map((feature, index: number) => {
                 const FeatureIcon = feature.icon
                 return (
                   <div

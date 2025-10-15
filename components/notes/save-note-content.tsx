@@ -177,7 +177,7 @@ export function SaveNoteContent({
       </div>
 
       <div className="mt-3 text-xs text-gray-500">
-        💡 팁: "모두 저장" 버튼을 사용하면 요약과 태그를 한 번에 생성하고 저장할 수 있습니다.
+        💡 팁: &quot;모두 저장&quot; 버튼을 사용하면 요약과 태그를 한 번에 생성하고 저장할 수 있습니다.
       </div>
     </div>
   );

@@ -5,8 +5,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { Search, FileText, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SearchSuggestion } from '@/hooks/use-search-suggestions';

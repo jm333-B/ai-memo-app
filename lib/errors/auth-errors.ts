@@ -92,7 +92,7 @@ export function getAuthErrorType(error: unknown): AuthErrorType {
   }
 
   // Supabase AuthError 타입 확인
-  const errorMessage = (error as any)?.message || String(error)
+  const errorMessage = (error as { message?: string })?.message || String(error)
 
   if (
     errorMessage.includes('Invalid login credentials') ||

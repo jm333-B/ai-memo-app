@@ -56,7 +56,7 @@ export function SearchResults({
           <div className="text-muted-foreground mb-2">🔍</div>
           <p className="font-medium">검색 결과가 없습니다</p>
           <p className="text-sm text-muted-foreground mt-1">
-            "{query}"에 대한 검색 결과를 찾을 수 없습니다
+            &quot;{query}&quot;에 대한 검색 결과를 찾을 수 없습니다
           </p>
         </div>
       </div>
@@ -69,7 +69,7 @@ export function SearchResults({
       {query && (
         <div className="mb-4">
           <p className="text-sm text-muted-foreground">
-            "{query}"에 대한 검색 결과 {notes.length}개
+            &quot;{query}&quot;에 대한 검색 결과 {notes.length}개
           </p>
         </div>
       )}

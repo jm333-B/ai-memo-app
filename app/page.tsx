@@ -4,9 +4,7 @@
 // Related: app/actions/auth.ts, app/login/page.tsx, app/signup/page.tsx
 
 import { redirect } from "next/navigation"
-import Link from "next/link"
 import { getCurrentUser } from "@/app/actions/auth"
-import { LogoutButton } from "@/components/logout-button"
 
 export default async function Home() {
   // 현재 로그인한 사용자 확인

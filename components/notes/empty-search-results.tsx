@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, RotateCcw, Tag, Clock } from 'lucide-react';
+import { Search, RotateCcw, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState as BaseEmptyState } from '@/components/ui/empty-state';
@@ -153,7 +153,7 @@ export function EmptySearchResults({
         description={
           <div className="space-y-2">
             <p className="text-gray-600">
-              <span className="font-medium">"{searchQuery}"</span>에 대한 검색 결과를 찾을 수 없습니다.
+              <span className="font-medium">&quot;{searchQuery}&quot;</span>에 대한 검색 결과를 찾을 수 없습니다.
             </p>
             <p className="text-sm text-gray-500">
               다른 검색어를 시도하거나 필터를 조정해보세요.

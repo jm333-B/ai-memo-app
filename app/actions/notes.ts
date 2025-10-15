@@ -12,6 +12,7 @@ import { createNoteSchema } from '@/lib/validations/notes';
 import { createClient } from '@/lib/supabase/server';
 import { generateNoteTags } from '@/app/actions/ai';
 import { eq, desc, asc, count, and, isNull, isNotNull, ilike, or, inArray, gte, lte } from 'drizzle-orm';
+import { Note } from '@/drizzle/schema';
 
 export async function createNote(formData: FormData) {
   try {
@@ -715,7 +716,7 @@ export async function filterNotesByDateRange(
       lte(schema.notes.createdAt, normalizedEndDate)
     );
 
-    let notes: any[] = [];
+    let notes: Note[] = [];
 
     // 태그 필터링이 있는 경우
     if (tags && tags.length > 0) {

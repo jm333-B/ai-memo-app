@@ -6,12 +6,10 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
 import { signOut } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 
 export function LogoutButton() {
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 

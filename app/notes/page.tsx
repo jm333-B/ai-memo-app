@@ -17,7 +17,7 @@ import { LogoutButton } from '@/components/logout-button';
 import { SortDropdown, type SortOption } from '@/components/notes/sort-dropdown';
 import { NotesList } from '@/components/notes/notes-list';
 import { IntegratedSearch } from '@/components/notes/integrated-search';
-import { SearchSkeleton, SearchError } from '@/components/ui/search-loading';
+import { SearchSkeleton } from '@/components/ui/search-loading';
 import { Note } from '@/drizzle/schema';
 
 interface NotesPageState {

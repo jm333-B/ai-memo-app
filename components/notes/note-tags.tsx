@@ -137,7 +137,7 @@ export function NoteTags({ noteId }: NoteTagsProps) {
         
         {tags.length === 0 && !isGenerating && !error && (
           <p className="text-sm text-gray-500 italic">
-            태그를 자동 생성하려면 "자동 생성" 버튼을 클릭하세요
+            태그를 자동 생성하려면 &quot;자동 생성&quot; 버튼을 클릭하세요
           </p>
         )}
       </div>
