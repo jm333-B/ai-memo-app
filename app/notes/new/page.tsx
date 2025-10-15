@@ -28,11 +28,14 @@ import { getDraftKey } from '@/lib/utils/draft-storage';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Save, Trash2 } from 'lucide-react';
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
+import { hasMarkdownSyntax } from '@/lib/utils/markdown';
 
 export default function NewNotePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const form = useForm<CreateNoteInput & { autoGenerateTags: boolean }>({
     resolver: zodResolver(createNoteSchema),
@@ -149,15 +152,34 @@ export default function NewNotePage() {
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>본문</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>본문</FormLabel>
+                      {hasMarkdownSyntax(field.value) && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowPreview(!showPreview)}
+                          className="text-xs"
+                        >
+                          {showPreview ? '편집' : '미리보기'}
+                        </Button>
+                      )}
+                    </div>
                     <FormControl>
-                      <Textarea
-                        placeholder="노트 내용을 입력하세요"
-                        {...field}
-                        disabled={isSubmitting}
-                        rows={15}
-                        className="resize-none"
-                      />
+                      {showPreview ? (
+                        <div className="min-h-[400px] rounded-md border border-gray-300 bg-white p-4">
+                          <MarkdownRenderer content={field.value} />
+                        </div>
+                      ) : (
+                        <Textarea
+                          placeholder="노트 내용을 입력하세요 (마크다운 문법 지원)"
+                          {...field}
+                          disabled={isSubmitting}
+                          rows={15}
+                          className="resize-none"
+                        />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>

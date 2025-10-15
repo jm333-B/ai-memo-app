@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/form';
 import { createNoteSchema, type CreateNoteInput } from '@/lib/validations/notes';
 import { getNoteById, updateNote } from '@/app/actions/notes';
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
+import { hasMarkdownSyntax } from '@/lib/utils/markdown';
 
 interface NoteEditPageProps {
   params: Promise<{ id: string }>;
@@ -33,6 +35,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
 
   const form = useForm<CreateNoteInput>({
     resolver: zodResolver(createNoteSchema),
@@ -166,15 +169,34 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>본문</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>본문</FormLabel>
+                      {hasMarkdownSyntax(field.value) && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowPreview(!showPreview)}
+                          className="text-xs"
+                        >
+                          {showPreview ? '편집' : '미리보기'}
+                        </Button>
+                      )}
+                    </div>
                     <FormControl>
-                      <Textarea
-                        placeholder="노트 내용을 입력하세요"
-                        {...field}
-                        disabled={isSubmitting}
-                        rows={15}
-                        className="resize-none"
-                      />
+                      {showPreview ? (
+                        <div className="min-h-[400px] rounded-md border border-gray-300 bg-white p-4">
+                          <MarkdownRenderer content={field.value} />
+                        </div>
+                      ) : (
+                        <Textarea
+                          placeholder="노트 내용을 입력하세요 (마크다운 문법 지원)"
+                          {...field}
+                          disabled={isSubmitting}
+                          rows={15}
+                          className="resize-none"
+                        />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
