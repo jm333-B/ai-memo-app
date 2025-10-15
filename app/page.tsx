@@ -6,6 +6,9 @@
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/app/actions/auth"
 
+// 쿠키를 사용하므로 동적 렌더링 강제
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   // 현재 로그인한 사용자 확인
   const user = await getCurrentUser()

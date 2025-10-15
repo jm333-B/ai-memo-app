@@ -15,6 +15,9 @@ import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { hasMarkdownSyntax } from '@/lib/utils/markdown';
 import { SaveNoteContent } from '@/components/notes/save-note-content';
 
+// 쿠키를 사용하므로 동적 렌더링 강제
+export const dynamic = 'force-dynamic'
+
 interface NoteDetailPageProps {
   params: Promise<{ id: string }>;
 }

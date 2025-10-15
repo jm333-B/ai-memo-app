@@ -9,6 +9,9 @@ import { getDeletedNotes } from '@/app/actions/notes';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { RestoreNoteButton } from '@/components/notes/restore-note-button';
 
+// 쿠키를 사용하므로 동적 렌더링 강제
+export const dynamic = 'force-dynamic'
+
 export default async function TrashPage() {
   const { notes, error } = await getDeletedNotes();
 
