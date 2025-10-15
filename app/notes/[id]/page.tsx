@@ -11,6 +11,8 @@ import { formatRelativeTime } from '@/lib/utils/date';
 import { DeleteNoteButton } from '@/components/notes/delete-note-button';
 import { NoteSummary } from '@/components/notes/note-summary';
 import { NoteTags } from '@/components/notes/note-tags';
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
+import { hasMarkdownSyntax } from '@/lib/utils/markdown';
 
 interface NoteDetailPageProps {
   params: Promise<{ id: string }>;
@@ -66,11 +68,15 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
 
         {/* 본문 */}
         <div className="rounded-lg bg-white px-8 py-10 shadow-sm ring-1 ring-gray-900/5">
-          <div className="prose prose-gray max-w-none">
-            <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-              {note.content}
-            </p>
-          </div>
+          {hasMarkdownSyntax(note.content) ? (
+            <MarkdownRenderer content={note.content} />
+          ) : (
+            <div className="prose prose-gray max-w-none">
+              <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                {note.content}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

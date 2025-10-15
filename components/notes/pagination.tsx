@@ -12,13 +12,20 @@ import { Button } from '@/components/ui/button';
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
+  onPageChange?: (page: number) => void;
 }
 
-export function Pagination({ currentPage, totalPages }: PaginationProps) {
+export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   const pathname = usePathname();
 
   const createPageURL = (pageNumber: number) => {
     return `${pathname}?page=${pageNumber}`;
+  };
+
+  const handlePageClick = (pageNumber: number) => {
+    if (onPageChange) {
+      onPageChange(pageNumber);
+    }
   };
 
   const hasPrevious = currentPage > 1;
@@ -26,11 +33,22 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
 
   return (
     <div className="flex items-center justify-center gap-2 pt-8">
-      <Link href={createPageURL(currentPage - 1)}>
-        <Button variant="outline" disabled={!hasPrevious} size="sm">
+      {onPageChange ? (
+        <Button 
+          variant="outline" 
+          disabled={!hasPrevious} 
+          size="sm"
+          onClick={() => handlePageClick(currentPage - 1)}
+        >
           이전
         </Button>
-      </Link>
+      ) : (
+        <Link href={createPageURL(currentPage - 1)}>
+          <Button variant="outline" disabled={!hasPrevious} size="sm">
+            이전
+          </Button>
+        </Link>
+      )}
 
       <div className="flex items-center gap-1">
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
@@ -40,7 +58,17 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
             page === totalPages ||
             (page >= currentPage - 1 && page <= currentPage + 1)
           ) {
-            return (
+            return onPageChange ? (
+              <Button
+                key={page}
+                variant={page === currentPage ? 'default' : 'outline'}
+                size="sm"
+                className="min-w-[40px]"
+                onClick={() => handlePageClick(page)}
+              >
+                {page}
+              </Button>
+            ) : (
               <Link key={page} href={createPageURL(page)}>
                 <Button
                   variant={page === currentPage ? 'default' : 'outline'}
@@ -66,11 +94,22 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         })}
       </div>
 
-      <Link href={createPageURL(currentPage + 1)}>
-        <Button variant="outline" disabled={!hasNext} size="sm">
+      {onPageChange ? (
+        <Button 
+          variant="outline" 
+          disabled={!hasNext} 
+          size="sm"
+          onClick={() => handlePageClick(currentPage + 1)}
+        >
           다음
         </Button>
-      </Link>
+      ) : (
+        <Link href={createPageURL(currentPage + 1)}>
+          <Button variant="outline" disabled={!hasNext} size="sm">
+            다음
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }

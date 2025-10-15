@@ -26,19 +26,27 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 interface SortDropdownProps {
   disabled?: boolean;
+  onSortChange?: (sort: SortOption) => void;
 }
 
-export function SortDropdown({ disabled = false }: SortDropdownProps) {
+export function SortDropdown({ disabled = false, onSortChange }: SortDropdownProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentSort = (searchParams.get("sort") as SortOption) || "latest";
 
   function handleSortChange(value: string) {
-    const params = new URLSearchParams(searchParams);
-    params.set("sort", value);
-    // 정렬 변경 시 페이지를 1로 리셋
-    params.set("page", "1");
-    router.push(`/notes?${params.toString()}`);
+    const sortValue = value as SortOption;
+    
+    if (onSortChange) {
+      onSortChange(sortValue);
+    } else {
+      // 기본 동작: URL 업데이트
+      const params = new URLSearchParams(searchParams);
+      params.set("sort", value);
+      // 정렬 변경 시 페이지를 1로 리셋
+      params.set("page", "1");
+      router.push(`/notes?${params.toString()}`);
+    }
   }
 
   return (

@@ -8,19 +8,25 @@
 import Link from 'next/link';
 import { type Note } from '@/lib/db';
 import { formatRelativeTime, truncateText } from '@/lib/utils/date';
+import { truncateMarkdown } from '@/lib/utils/markdown';
+import { highlightText, createHighlightedHTML } from '@/lib/utils/highlight';
 
 interface NoteCardProps {
   note: Note;
   isDeleteMode?: boolean;
   isSelected?: boolean;
   onSelect?: (noteId: string) => void;
+  showPreview?: boolean;
+  highlightQuery?: string;
 }
 
 export function NoteCard({ 
   note, 
   isDeleteMode = false, 
   isSelected = false, 
-  onSelect 
+  onSelect,
+  showPreview = false,
+  highlightQuery
 }: NoteCardProps) {
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onSelect) {
@@ -60,10 +66,26 @@ export function NoteCard({
         )}
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-lg font-semibold text-gray-900">
-            {note.title}
+            {highlightQuery ? (
+              <span 
+                dangerouslySetInnerHTML={createHighlightedHTML(
+                  highlightText(note.title, highlightQuery)
+                )}
+              />
+            ) : (
+              note.title
+            )}
           </h3>
           <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-            {truncateText(note.content, 150)}
+            {highlightQuery ? (
+              <span 
+                dangerouslySetInnerHTML={createHighlightedHTML(
+                  highlightText(truncateMarkdown(note.content, 150), highlightQuery)
+                )}
+              />
+            ) : (
+              truncateMarkdown(note.content, 150)
+            )}
           </p>
         </div>
         <time className="flex-shrink-0 text-xs text-gray-500">
