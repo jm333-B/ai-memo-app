@@ -12,8 +12,12 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL 환경 변수가 설정되지 않았습니다.');
 }
 
-// Postgres 클라이언트 생성
-const client = postgres(process.env.DATABASE_URL);
+// Postgres 클라이언트 생성 (연결 옵션 추가)
+const client = postgres(process.env.DATABASE_URL, {
+  max: 1, // 연결 풀 크기 제한
+  idle_timeout: 20, // 유휴 타임아웃 (초)
+  connect_timeout: 10, // 연결 타임아웃 (초)
+});
 
 // Drizzle 인스턴스 생성
 export const db = drizzle(client, { schema });

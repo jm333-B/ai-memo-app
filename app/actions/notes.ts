@@ -33,7 +33,7 @@ export async function createNote(formData: FormData) {
     const autoGenerateTags = formData.get('autoGenerateTags') === 'true';
 
     // 유효성 검증
-    const validation = createNoteSchema.safeParse({ title, content });
+    const validation = createNoteSchema.safeParse({ title, content, autoGenerateTags });
 
     if (!validation.success) {
       const errors = validation.error.flatten().fieldErrors;
@@ -203,9 +203,10 @@ export async function updateNote(noteId: string, formData: FormData) {
     // 폼 데이터 추출
     const title = formData.get('title') as string;
     const content = formData.get('content') as string;
+    const autoGenerateTags = formData.get('autoGenerateTags') === 'true';
 
     // 유효성 검증
-    const validation = createNoteSchema.safeParse({ title, content });
+    const validation = createNoteSchema.safeParse({ title, content, autoGenerateTags });
 
     if (!validation.success) {
       const errors = validation.error.flatten().fieldErrors;

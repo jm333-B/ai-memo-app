@@ -87,6 +87,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
       const formData = new FormData();
       formData.append('title', data.title);
       formData.append('content', data.content);
+      formData.append('autoGenerateTags', (data.autoGenerateTags ?? false).toString());
 
       const result = await updateNote(noteId, formData);
 
