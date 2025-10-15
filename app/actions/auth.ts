@@ -35,7 +35,7 @@ export async function signUp(data: SignUpFormData): Promise<ActionResult> {
     
     if (!validatedData.success) {
       return {
-        error: validatedData.error.errors[0]?.message || "입력값이 올바르지 않습니다",
+        error: validatedData.error.issues[0]?.message || "입력값이 올바르지 않습니다",
         action: "입력 내용을 확인하고 다시 시도하세요.",
       }
     }
@@ -103,7 +103,7 @@ export async function signIn(data: SignInFormData): Promise<ActionResult> {
     
     if (!validatedData.success) {
       return {
-        error: validatedData.error.errors[0]?.message || "입력값이 올바르지 않습니다",
+        error: validatedData.error.issues[0]?.message || "입력값이 올바르지 않습니다",
         action: "입력 내용을 확인하고 다시 시도하세요.",
       }
     }

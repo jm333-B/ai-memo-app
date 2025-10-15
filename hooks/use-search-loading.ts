@@ -120,7 +120,7 @@ export function useSearchLoading(
 
   // 재시도 (exponential backoff)
   const retry = useCallback(async () => {
-    if (!onRetry || loadingState.error?.retryCount >= maxRetries) {
+    if (!onRetry || (loadingState.error?.retryCount || 0) >= maxRetries) {
       return;
     }
 
@@ -173,8 +173,8 @@ export function useSearchLoading(
   const isLoading = loadingState.state === 'loading';
   const hasError = loadingState.state === 'error';
   const canRetry = hasError && 
-    loadingState.error && 
-    loadingState.error.retryCount < maxRetries &&
+    !!loadingState.error && 
+    (loadingState.error.retryCount || 0) < maxRetries &&
     !!onRetry;
 
   return {

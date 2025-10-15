@@ -43,6 +43,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
     defaultValues: {
       title: '',
       content: '',
+      autoGenerateTags: false,
     },
   });
 

@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,7 @@ interface NotesPageState {
   isSearchMode: boolean;
 }
 
-export default function NotesPage() {
+function NotesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -60,7 +60,7 @@ export default function NotesPage() {
           ...prev,
           notes: result.notes,
           totalPages: result.totalPages,
-          currentPage: result.currentPage,
+          currentPage: result.currentPage || 1,
           isLoading: false,
           isSearchMode: false,
         }));
@@ -238,7 +238,6 @@ export default function NotesPage() {
           <>
             <NotesList 
               notes={state.notes} 
-              highlightQuery={state.isSearchMode ? searchQuery : undefined}
             />
 
             {!state.isSearchMode && state.totalPages > 1 && (
@@ -252,5 +251,13 @@ export default function NotesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function NotesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NotesPageContent />
+    </Suspense>
   );
 }

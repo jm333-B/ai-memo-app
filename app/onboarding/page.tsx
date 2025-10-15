@@ -144,7 +144,7 @@ export default function OnboardingPage() {
           <div className="mb-8 space-y-4">
             {Array.isArray(step.features) && typeof step.features[0] === 'string' ? (
               // Step 1, 3: 간단한 목록
-              step.features.map((feature, index) => (
+              (step.features as string[]).map((feature, index) => (
                 <div
                   key={index}
                   className="flex items-start gap-3 rounded-lg bg-gray-50 p-4"

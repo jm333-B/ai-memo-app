@@ -11,6 +11,7 @@ export const createNoteSchema = z.object({
     .min(1, '제목을 입력해주세요')
     .max(255, '제목은 최대 255자까지 입력 가능합니다'),
   content: z.string().min(1, '본문을 입력해주세요'),
+  autoGenerateTags: z.boolean(),
 });
 
 export type CreateNoteInput = z.infer<typeof createNoteSchema>;

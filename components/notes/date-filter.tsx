@@ -39,7 +39,8 @@ export function DateFilter({ onFilterChange, className = '' }: DateFilterProps) 
 
   // 날짜 필터 상태가 변경될 때마다 부모 컴포넌트에 알림
   useEffect(() => {
-    const { startDate, endDate, isActive } = dateFilterState;
+    const { startDate, endDate } = dateFilterState.dateRange;
+    const { isActive } = dateFilterState;
     onFilterChange(startDate, endDate, isActive);
   }, [dateFilterState, onFilterChange]);
 

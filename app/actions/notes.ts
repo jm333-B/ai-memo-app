@@ -145,7 +145,7 @@ export async function getNotes(
     return { notes, totalPages, currentPage: page };
   } catch (error) {
     console.error('노트 목록 조회 실패:', error);
-    return { notes: [], totalPages: 0, error: '노트 목록을 불러올 수 없습니다' };
+    return { notes: [], totalPages: 0, currentPage: 1, error: '노트 목록을 불러올 수 없습니다' };
   }
 }
 
@@ -512,7 +512,24 @@ export async function filterNotesByTags(tags: string[], searchQuery?: string, li
     const filterStartTime = Date.now();
 
     // 태그 필터링 쿼리 (다중 태그 AND 조건)
-    let query = db
+    const baseConditions = and(
+      eq(schema.notes.userId, user.id),
+      isNull(schema.notes.deletedAt),
+      inArray(schema.noteTags.tag, tags)
+    );
+
+    // 검색어가 있으면 추가 조건 포함
+    const whereConditions = searchQuery && searchQuery.trim() 
+      ? and(
+          baseConditions,
+          or(
+            ilike(schema.notes.title, `%${searchQuery.trim()}%`),
+            ilike(schema.notes.content, `%${searchQuery.trim()}%`)
+          )
+        )
+      : baseConditions;
+
+    const query = db
       .selectDistinct({
         id: schema.notes.id,
         userId: schema.notes.userId,
@@ -524,29 +541,7 @@ export async function filterNotesByTags(tags: string[], searchQuery?: string, li
       })
       .from(schema.notes)
       .innerJoin(schema.noteTags, eq(schema.notes.id, schema.noteTags.noteId))
-      .where(
-        and(
-          eq(schema.notes.userId, user.id),
-          isNull(schema.notes.deletedAt),
-          inArray(schema.noteTags.tag, tags)
-        )
-      );
-
-    // 검색어가 있으면 추가 필터링
-    if (searchQuery && searchQuery.trim()) {
-      const searchPattern = `%${searchQuery.trim()}%`;
-      query = query.where(
-        and(
-          eq(schema.notes.userId, user.id),
-          isNull(schema.notes.deletedAt),
-          inArray(schema.noteTags.tag, tags),
-          or(
-            ilike(schema.notes.title, searchPattern),
-            ilike(schema.notes.content, searchPattern)
-          )
-        )
-      );
-    }
+      .where(whereConditions);
 
     // 결과 정렬 및 제한
     const notes = await query
@@ -725,7 +720,23 @@ export async function filterNotesByDateRange(
     // 태그 필터링이 있는 경우
     if (tags && tags.length > 0) {
       // 태그와 날짜 범위 조합 쿼리
-      let query = db
+      const baseTagConditions = and(
+        dateConditions,
+        inArray(schema.noteTags.tag, tags)
+      );
+
+      // 검색어가 있으면 추가 조건 포함
+      const tagWhereConditions = searchQuery && searchQuery.trim() 
+        ? and(
+            baseTagConditions,
+            or(
+              ilike(schema.notes.title, `%${searchQuery.trim()}%`),
+              ilike(schema.notes.content, `%${searchQuery.trim()}%`)
+            )
+          )
+        : baseTagConditions;
+
+      const query = db
         .selectDistinct({
           id: schema.notes.id,
           userId: schema.notes.userId,
@@ -737,27 +748,7 @@ export async function filterNotesByDateRange(
         })
         .from(schema.notes)
         .innerJoin(schema.noteTags, eq(schema.notes.id, schema.noteTags.noteId))
-        .where(
-          and(
-            dateConditions,
-            inArray(schema.noteTags.tag, tags)
-          )
-        );
-
-      // 검색어가 있으면 추가 필터링
-      if (searchQuery && searchQuery.trim()) {
-        const searchPattern = `%${searchQuery.trim()}%`;
-        query = query.where(
-          and(
-            dateConditions,
-            inArray(schema.noteTags.tag, tags),
-            or(
-              ilike(schema.notes.title, searchPattern),
-              ilike(schema.notes.content, searchPattern)
-            )
-          )
-        );
-      }
+        .where(tagWhereConditions);
 
       const rawNotes = await query
         .orderBy(desc(schema.notes.updatedAt))
@@ -779,24 +770,20 @@ export async function filterNotesByDateRange(
       }
     } else {
       // 태그 필터링이 없는 경우 - 날짜 범위와 검색어만
-      let query = db
-        .select()
-        .from(schema.notes)
-        .where(dateConditions);
-
-      // 검색어가 있으면 추가 필터링
-      if (searchQuery && searchQuery.trim()) {
-        const searchPattern = `%${searchQuery.trim()}%`;
-        query = query.where(
-          and(
+      const dateWhereConditions = searchQuery && searchQuery.trim() 
+        ? and(
             dateConditions,
             or(
-              ilike(schema.notes.title, searchPattern),
-              ilike(schema.notes.content, searchPattern)
+              ilike(schema.notes.title, `%${searchQuery.trim()}%`),
+              ilike(schema.notes.content, `%${searchQuery.trim()}%`)
             )
           )
-        );
-      }
+        : dateConditions;
+
+      const query = db
+        .select()
+        .from(schema.notes)
+        .where(dateWhereConditions);
 
       notes = await query
         .orderBy(desc(schema.notes.updatedAt))
