@@ -20,5 +20,5 @@ export const db = drizzle(client, { schema });
 
 // 스키마와 타입 재수출
 export { schema };
-export type { Note, NewNote } from '@/drizzle/schema';
+export type { Note, NewNote, NoteTag, NewNoteTag } from '@/drizzle/schema';
 

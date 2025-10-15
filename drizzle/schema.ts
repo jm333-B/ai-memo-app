@@ -3,7 +3,7 @@
 // Notes 테이블, UserProfiles 테이블과 관련 인덱스를 Drizzle ORM으로 정의
 // 관련 파일: drizzle.config.ts, lib/db/index.ts, app/actions/notes.ts
 
-import { pgTable, uuid, text, timestamp, boolean, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, boolean, index, unique } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const notes = pgTable(
@@ -73,6 +73,28 @@ export const summaries = pgTable(
   })
 );
 
+// 노트 태그 테이블
+export const noteTags = pgTable(
+  'note_tags',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    noteId: uuid('note_id')
+      .notNull()
+      .references(() => notes.id, { onDelete: 'cascade' }),
+    tag: text('tag').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => ({
+    noteIdIdx: index('note_tags_note_id_idx').on(table.noteId),
+    tagIdx: index('note_tags_tag_idx').on(table.tag),
+    uniqueNoteTag: unique('unique_note_tag').on(table.noteId, table.tag),
+  })
+);
+
 // 타입 추출
 export type Note = typeof notes.$inferSelect;
 export type NewNote = typeof notes.$inferInsert;
@@ -80,4 +102,6 @@ export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
 export type Summary = typeof summaries.$inferSelect;
 export type NewSummary = typeof summaries.$inferInsert;
+export type NoteTag = typeof noteTags.$inferSelect;
+export type NewNoteTag = typeof noteTags.$inferInsert;
 

@@ -10,6 +10,7 @@ import { getNoteById } from '@/app/actions/notes';
 import { formatRelativeTime } from '@/lib/utils/date';
 import { DeleteNoteButton } from '@/components/notes/delete-note-button';
 import { NoteSummary } from '@/components/notes/note-summary';
+import { NoteTags } from '@/components/notes/note-tags';
 
 interface NoteDetailPageProps {
   params: Promise<{ id: string }>;
@@ -59,6 +60,9 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
 
         {/* AI 요약 */}
         <NoteSummary noteId={note.id} />
+
+        {/* 태그 */}
+        <NoteTags noteId={note.id} />
 
         {/* 본문 */}
         <div className="rounded-lg bg-white px-8 py-10 shadow-sm ring-1 ring-gray-900/5">

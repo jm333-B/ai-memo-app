@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -33,11 +34,12 @@ export default function NewNotePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<CreateNoteInput>({
+  const form = useForm<CreateNoteInput & { autoGenerateTags: boolean }>({
     resolver: zodResolver(createNoteSchema),
     defaultValues: {
       title: '',
       content: '',
+      autoGenerateTags: false,
     },
   });
 
@@ -67,7 +69,7 @@ export default function NewNotePage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [title, content, isSubmitting]);
 
-  async function onSubmit(data: CreateNoteInput) {
+  async function onSubmit(data: CreateNoteInput & { autoGenerateTags: boolean }) {
     setIsSubmitting(true);
     setError(null);
 
@@ -75,6 +77,7 @@ export default function NewNotePage() {
       const formData = new FormData();
       formData.append('title', data.title);
       formData.append('content', data.content);
+      formData.append('autoGenerateTags', (data.autoGenerateTags ?? false).toString());
 
       const result = await createNote(formData);
 
@@ -157,6 +160,30 @@ export default function NewNotePage() {
                       />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="autoGenerateTags"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-normal">
+                        자동 태그 생성
+                      </FormLabel>
+                      <p className="text-xs text-gray-500">
+                        노트 저장 시 AI가 자동으로 관련 태그를 생성합니다
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />

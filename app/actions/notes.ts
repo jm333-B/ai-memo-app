@@ -10,6 +10,7 @@ import { revalidatePath } from 'next/cache';
 import { db, schema } from '@/lib/db';
 import { createNoteSchema } from '@/lib/validations/notes';
 import { createClient } from '@/lib/supabase/server';
+import { generateNoteTags } from '@/app/actions/ai';
 import { eq, desc, asc, count, and, isNull, isNotNull } from 'drizzle-orm';
 
 export async function createNote(formData: FormData) {
@@ -28,6 +29,7 @@ export async function createNote(formData: FormData) {
     // 폼 데이터 추출
     const title = formData.get('title') as string;
     const content = formData.get('content') as string;
+    const autoGenerateTags = formData.get('autoGenerateTags') === 'true';
 
     // 유효성 검증
     const validation = createNoteSchema.safeParse({ title, content });
@@ -48,6 +50,14 @@ export async function createNote(formData: FormData) {
         content: validation.data.content,
       })
       .returning();
+
+    // 자동 태그 생성 (백그라운드에서 실행)
+    if (autoGenerateTags && newNote.content && newNote.content.trim().length > 0) {
+      // 비동기로 태그 생성 (에러가 발생해도 노트 생성은 성공으로 처리)
+      generateNoteTags(newNote.id).catch((error) => {
+        console.error('자동 태그 생성 실패:', error);
+      });
+    }
 
     // 목록 페이지 캐시 무효화
     revalidatePath('/notes');
