@@ -108,7 +108,7 @@ export function DateFilter({ onFilterChange, className = '' }: DateFilterProps) 
   return (
     <div className={`space-y-3 ${className}`}>
       {/* 날짜 필터 헤더 */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium">날짜 범위</span>
@@ -118,7 +118,7 @@ export function DateFilter({ onFilterChange, className = '' }: DateFilterProps) 
             variant="ghost"
             size="sm"
             onClick={clearDateFilter}
-            className="h-6 px-2 text-xs"
+            className="h-6 px-2 text-xs self-start sm:self-auto"
           >
             <X className="h-3 w-3 mr-1" />
             초기화

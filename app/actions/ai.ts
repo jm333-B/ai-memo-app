@@ -252,35 +252,48 @@ export async function generateNoteTags(noteId: string) {
     const prompt = generateTagsPrompt(truncatedContent);
 
     // Gemini API 호출
+    console.log('태그 생성을 위한 프롬프트:', prompt);
     const tagsString = await callGeminiAPI(prompt);
+    console.log('Gemini API 응답 (태그 문자열):', tagsString);
 
     // 태그 파싱 및 정규화
     const tags = parseTags(tagsString);
+    console.log('파싱된 태그:', tags);
 
     if (tags.length === 0) {
+      console.error('태그 파싱 결과가 비어있습니다. 원본 응답:', tagsString);
       return { success: false, error: '태그를 생성할 수 없습니다' };
     }
 
     // 데이터베이스 작업 - 테이블이 존재하지 않을 경우를 대비
     try {
+      console.log('데이터베이스에 태그 저장 시도 중...');
+      console.log('저장할 태그 데이터:', tags.map(tag => ({ noteId: note.id, tag })));
+      
       // 기존 태그 삭제 (선택적)
+      console.log('기존 태그 삭제 중...');
       await db.delete(noteTags).where(eq(noteTags.noteId, noteId));
+      console.log('기존 태그 삭제 완료');
 
       // 새 태그 저장
+      console.log('새 태그 저장 중...');
       const savedTags = await db.insert(noteTags).values(
         tags.map(tag => ({ noteId: note.id, tag }))
       ).returning();
 
+      console.log('태그가 데이터베이스에 저장되었습니다:', savedTags);
       return { success: true, tags: savedTags };
     } catch (dbError) {
       // 테이블이 존재하지 않는 경우 임시 태그 반환
-      console.warn('note_tags 테이블이 존재하지 않습니다:', dbError);
+      console.error('데이터베이스 저장 실패:', dbError);
+      console.warn('note_tags 테이블이 존재하지 않거나 다른 오류가 발생했습니다:', dbError);
       const mockTags = tags.map((tag, index) => ({
         id: `temp-${index}`,
         noteId: note.id,
         tag,
         createdAt: new Date()
       }));
+      console.log('임시 태그 생성됨:', mockTags);
       return { success: true, tags: mockTags };
     }
   } catch (error) {

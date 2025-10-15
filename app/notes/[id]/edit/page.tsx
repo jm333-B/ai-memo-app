@@ -24,6 +24,7 @@ import { createNoteSchema, type CreateNoteInput } from '@/lib/validations/notes'
 import { getNoteById, updateNote } from '@/app/actions/notes';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { hasMarkdownSyntax } from '@/lib/utils/markdown';
+import { NoteTags } from '@/components/notes/note-tags';
 
 interface NoteEditPageProps {
   params: Promise<{ id: string }>;
@@ -230,6 +231,14 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
             </form>
           </Form>
         </div>
+
+        {/* 태그 섹션 */}
+        {noteId && (
+          <div className="rounded-lg bg-white px-8 py-6 shadow-sm ring-1 ring-gray-900/5">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">태그 관리</h3>
+            <NoteTags noteId={noteId} />
+          </div>
+        )}
       </div>
     </div>
   );

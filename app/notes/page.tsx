@@ -152,29 +152,51 @@ export default function NotesPage() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-4xl space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-              내 노트
-            </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              {state.isSearchMode 
-                ? `검색 결과 ${state.notes.length}개`
-                : state.notes.length > 0 
-                  ? `총 ${state.notes.length}개의 노트` 
-                  : '노트가 없습니다'
-              }
-            </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+                내 노트
+              </h1>
+              <p className="mt-2 text-sm text-gray-600">
+                {state.isSearchMode 
+                  ? `검색 결과 ${state.notes.length}개`
+                  : state.notes.length > 0 
+                    ? `총 ${state.notes.length}개의 노트` 
+                    : '노트가 없습니다'
+                }
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <Link href="/notes/trash">
+                <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                  휴지통
+                </Button>
+              </Link>
+              <Link href="/notes/new">
+                <Button size="sm" className="text-xs sm:text-sm">
+                  새 노트 작성
+                </Button>
+              </Link>
+              <LogoutButton />
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Link href="/notes/trash">
-              <Button variant="outline">휴지통</Button>
-            </Link>
-            <Link href="/notes/new">
-              <Button>새 노트 작성</Button>
-            </Link>
-            <LogoutButton />
-          </div>
+          
+          {/* 정렬 및 액션 바 */}
+          {!state.isLoading && state.notes.length > 0 && (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white rounded-lg border p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <span className="text-sm font-medium text-gray-700">정렬:</span>
+                {!state.isSearchMode && <SortDropdown onSortChange={handleSortChange} />}
+              </div>
+              <div className="text-sm text-gray-500">
+                {state.isSearchMode 
+                  ? `검색 결과 ${state.notes.length}개`
+                  : `페이지 ${state.currentPage} / ${state.totalPages}`
+                }
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 통합 검색 컴포넌트 */}
@@ -209,16 +231,11 @@ export default function NotesPage() {
                 }}
               />
             ) : (
-              <>
-                <SortDropdown disabled={true} />
-                <EmptyState />
-              </>
+              <EmptyState />
             )}
           </div>
         ) : (
           <>
-            {!state.isSearchMode && <SortDropdown onSortChange={handleSortChange} />}
-            
             <NotesList 
               notes={state.notes} 
               highlightQuery={state.isSearchMode ? searchQuery : undefined}

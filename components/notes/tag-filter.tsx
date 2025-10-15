@@ -64,14 +64,16 @@ export function TagFilter({ onFilterChange, className = "" }: TagFilterProps) {
     );
   }
 
-  if (tagFilterState.availableTags.length === 0) {
+  if (tagFilterState.availableTags.length === 0 && !tagFilterState.error) {
     return (
       <div className={`space-y-3 ${className}`}>
         <div className="flex items-center gap-2">
           <Tag className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium">태그 필터</span>
         </div>
-        <div className="text-sm text-muted-foreground">사용 가능한 태그가 없습니다</div>
+        <div className="text-sm text-muted-foreground">
+          아직 생성된 태그가 없습니다. 노트를 작성하고 AI 태그 생성을 사용해보세요.
+        </div>
       </div>
     );
   }
@@ -79,7 +81,7 @@ export function TagFilter({ onFilterChange, className = "" }: TagFilterProps) {
   return (
     <div className={`space-y-3 ${className}`}>
       {/* 헤더 */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-center gap-2">
           <Tag className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium">태그 필터</span>
@@ -95,7 +97,7 @@ export function TagFilter({ onFilterChange, className = "" }: TagFilterProps) {
             variant="ghost"
             size="sm"
             onClick={clearAllTags}
-            className="h-6 px-2 text-xs"
+            className="h-6 px-2 text-xs self-start sm:self-auto"
           >
             <RotateCcw className="h-3 w-3 mr-1" />
             초기화

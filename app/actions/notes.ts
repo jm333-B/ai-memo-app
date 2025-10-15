@@ -54,9 +54,17 @@ export async function createNote(formData: FormData) {
     // 자동 태그 생성 (백그라운드에서 실행)
     if (autoGenerateTags && newNote.content && newNote.content.trim().length > 0) {
       // 비동기로 태그 생성 (에러가 발생해도 노트 생성은 성공으로 처리)
-      generateNoteTags(newNote.id).catch((error) => {
-        console.error('자동 태그 생성 실패:', error);
-      });
+      generateNoteTags(newNote.id)
+        .then((result) => {
+          if (result.success) {
+            console.log('자동 태그 생성 성공:', result.tags);
+          } else {
+            console.error('자동 태그 생성 실패:', result.error);
+          }
+        })
+        .catch((error) => {
+          console.error('자동 태그 생성 중 예외 발생:', error);
+        });
     }
 
     // 목록 페이지 캐시 무효화
@@ -611,6 +619,13 @@ export async function getUserTags() {
     return { tags: tags.map(t => t.tag) };
   } catch (error) {
     console.error('태그 목록 조회 실패:', error);
+    
+    // 테이블이 존재하지 않는 경우를 구분하여 처리
+    if (error instanceof Error && error.message.includes('relation "note_tags" does not exist')) {
+      console.warn('note_tags 테이블이 존재하지 않습니다. 빈 배열을 반환합니다.');
+      return { tags: [] };
+    }
+    
     return { tags: [], error: '태그 목록을 불러올 수 없습니다' };
   }
 }
@@ -648,6 +663,13 @@ export async function getTagStats() {
     return { tagStats };
   } catch (error) {
     console.error('태그 통계 조회 실패:', error);
+    
+    // 테이블이 존재하지 않는 경우를 구분하여 처리
+    if (error instanceof Error && error.message.includes('relation "note_tags" does not exist')) {
+      console.warn('note_tags 테이블이 존재하지 않습니다. 빈 배열을 반환합니다.');
+      return { tagStats: [] };
+    }
+    
     return { tagStats: [], error: '태그 통계를 불러올 수 없습니다' };
   }
 }

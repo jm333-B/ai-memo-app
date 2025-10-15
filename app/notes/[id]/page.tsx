@@ -13,6 +13,7 @@ import { NoteSummary } from '@/components/notes/note-summary';
 import { NoteTags } from '@/components/notes/note-tags';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { hasMarkdownSyntax } from '@/lib/utils/markdown';
+import { SaveNoteContent } from '@/components/notes/save-note-content';
 
 interface NoteDetailPageProps {
   params: Promise<{ id: string }>;
@@ -59,6 +60,9 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
             </Link>
           </div>
         </div>
+
+        {/* AI 콘텐츠 저장 */}
+        <SaveNoteContent noteId={note.id} />
 
         {/* AI 요약 */}
         <NoteSummary noteId={note.id} />

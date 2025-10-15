@@ -48,6 +48,18 @@ export function useTagFilter(): UseTagFilterReturn {
         getTagStats(),
       ]);
 
+      // 태그 목록이 비어있고 오류가 없는 경우 (테이블이 존재하지 않는 경우)
+      if (tagsResult.tags.length === 0 && !tagsResult.error) {
+        setTagFilterState(prev => ({
+          ...prev,
+          availableTags: [],
+          tagStats: [],
+          isLoading: false,
+          error: undefined,
+        }));
+        return;
+      }
+
       if (tagsResult.error) {
         setTagFilterState(prev => ({
           ...prev,

@@ -51,9 +51,9 @@ export function SortDropdown({ disabled = false, onSortChange }: SortDropdownPro
 
   return (
     <div className="flex items-center gap-2">
-      <ArrowUpDown className="h-4 w-4 text-gray-500" />
+      <ArrowUpDown className="h-4 w-4 text-gray-500 hidden sm:block" />
       <Select value={currentSort} onValueChange={handleSortChange} disabled={disabled}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[140px] sm:w-[180px]">
           <SelectValue placeholder="정렬 기준" />
         </SelectTrigger>
         <SelectContent>
